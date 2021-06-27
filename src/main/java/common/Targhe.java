@@ -32,9 +32,9 @@ public class Targhe {
         this.lastCharCode = Integer.parseInt(split[2]);
     }
 
-    public Targa nextTarga(){
+    public String nextTarga(){
         increment(length-1);
-        return new Targa(this, String.valueOf(arr));
+        return String.valueOf(arr);
     }
 
     private boolean nextChar(int i){

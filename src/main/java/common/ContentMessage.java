@@ -7,14 +7,14 @@ import java.util.Date;
 public class ContentMessage {
 
     private TipoRichiesta tipoRichiesta;
-    private Targa targa;
+    private String targa;
     private String marca;
     private Date date;
     private static final String dateFormat = "EEE MMM d HH:mm:ss zzz yyyy";
     private static SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
 
 
-    public ContentMessage(TipoRichiesta tipoRichiesta, Targa targa, String marca, Date date){
+    public ContentMessage(TipoRichiesta tipoRichiesta, String targa, String marca, Date date){
         this.tipoRichiesta = tipoRichiesta;
         this.targa = targa;
         this.date = date;
@@ -25,12 +25,10 @@ public class ContentMessage {
         return tipoRichiesta.name() + "," + targa.toString() + "," + marca + "," + date.toString() + "\n";
     }
 
-    public synchronized static ContentMessage fromString(String str, Targhe targhe){
+    public synchronized static ContentMessage fromString(String str){
         String[] split = str.split(",");
         if (split.length != 4)
             throw new IllegalArgumentException("usage: $TipoRichiesta,$Targa,$Date");
-        String tipoRichiesta = split[0];
-        String targa = split[1];
         String date_str = split[3];
         Date date = null;
         try {
@@ -38,10 +36,10 @@ public class ContentMessage {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        return new ContentMessage(TipoRichiesta.valueOf(tipoRichiesta), new Targa(targhe, targa), split[2], date);
+        return new ContentMessage(TipoRichiesta.valueOf(split[0]), split[1], split[2], date);
     }
 
-    public Targa getTarga() {
+    public String getTarga() {
         return targa;
     }
 

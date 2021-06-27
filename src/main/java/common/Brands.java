@@ -1,5 +1,7 @@
 package common;
 
+import java.util.Random;
+
 public enum Brands {
     HONDA,
     MAZDA,
@@ -7,5 +9,9 @@ public enum Brands {
     VOLKSWAGEN,
     TOYOTA,
     BMW,
-    ALFA
+    ALFA;
+
+    public static Brands random(){
+        return Brands.values()[new Random().nextInt(Brands.values().length)];
+    }
 }

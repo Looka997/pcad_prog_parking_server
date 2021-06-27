@@ -5,10 +5,10 @@ import javax.management.OperationsException;
 import static java.util.Objects.requireNonNull;
 
 public abstract class Client {
-    private Targa targa;
+    private String targa;
     private String marca;
 
-    public Client(Targa targa, String marca){
+    public Client(String targa, String marca){
         requireNonNull(targa);
         this.targa = targa;
         this.marca = marca;
@@ -24,7 +24,7 @@ public abstract class Client {
         return client.getTarga().equals(targa) && client.getMarca().equals(marca);
     }
 
-    public Targa getTarga() {
+    public String getTarga() {
         return targa;
     }
     public String getMarca(){ return marca;}
