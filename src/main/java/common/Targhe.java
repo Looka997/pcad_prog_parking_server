@@ -1,5 +1,7 @@
 package common;
 
+import java.util.Random;
+
 public class Targhe {
     private static int length = 6;
     private static char[] arr = new char[length];
@@ -78,5 +80,11 @@ public class Targhe {
             return false;
         Targhe targhe = (Targhe) obj;
         return this.toString().equals(targhe.toString());
+    }
+    public String random(){
+        StringBuilder stringBuilder = new StringBuilder();
+        for(int i=0; i<length; ++i)
+            stringBuilder.append((char)(new Random().nextInt(lastCharCode - firstCharCode) + firstCharCode));
+        return stringBuilder.toString();
     }
 }
