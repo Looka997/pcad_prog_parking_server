@@ -1,7 +1,6 @@
 package server;
 
 import common.ContentMessage;
-import common.HandshakeMessage;
 import common.TipoRichiesta;
 
 import javax.management.OperationsException;
@@ -31,8 +30,7 @@ public class SensorWorker implements Runnable {
             InputStreamReader inputReader= new InputStreamReader(input);
             PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(),true);
             BufferedReader reader = new BufferedReader(inputReader);
-            HandshakeMessage hm = new HandshakeMessage(reader.readLine());
-            ContentMessage cm = ContentMessage.fromString(reader.readLine(), hm.getTarghe());
+            ContentMessage cm = ContentMessage.fromString(reader.readLine());
             if (cm.getTipoRichiesta().compareTo(TipoRichiesta.ENTRATA) == 0){
                 success = entering.submit(new PartialClient(cm.getTarga(), parking, cm.getMarca()) {
                     @Override

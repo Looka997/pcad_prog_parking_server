@@ -1,15 +1,13 @@
 package server;
 
 import common.Client;
-import common.Targa;
-import server.Parking;
 
 import javax.management.OperationsException;
 
 public class LocalClient extends Client {
     private Parking parking;
     private boolean parked;
-    public LocalClient(Targa targa, Parking parking, String marca) {
+    public LocalClient(String targa, Parking parking, String marca) {
         super(targa, marca);
         this.parking = parking;
         this.parked = false;
