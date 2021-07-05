@@ -5,6 +5,7 @@ import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.swing.*;
@@ -53,6 +54,9 @@ public class ServerGUI extends JFrame {
         pane.repaint();
         pane.validate();
 
+        PrintStream printStream = new PrintStream(new JTextAreaOutputStream(textArea));
+        System.setOut(printStream);
+
         openButton.addActionListener(e -> {
             parkingThread = new Thread(parkingServer);
             parkingThread.start();
@@ -78,61 +82,5 @@ public class ServerGUI extends JFrame {
         //Display the window.
         frame.pack();
         frame.setVisible(true);
-    }
-
-    public static void main(String[] args) throws IOException {
-        int capacity, port = 8080, timeOut = 5, logs_delay=1;
-        ParkingServer parkingServer;
-        if (args.length > 0 && args.length < 5){
-            capacity = Integer.valueOf(args[0]);
-            switch (args.length){
-                case 4: logs_delay = Integer.valueOf(args[3]);
-                case 3: timeOut = Integer.valueOf(args[2]);
-                case 2: port = Integer.valueOf(args[1]);
-            }
-            System.out.println("capacity: " + capacity + "\nUsing port " + port);
-            System.out.println("Using timeout= " + timeOut + "s after accepting entering clients stops");
-            System.out.println("Saving logs every " + logs_delay + "s");
-            parkingServer= new ParkingServer(port, capacity);
-            Runnable init = () -> {
-                new ServerGUI(parkingServer).createAndShowGUI();
-            };
-            SwingUtilities.invokeLater(init);
-            java.util.Timer timer = new Timer();
-            String filename = "log";
-            TimerTask printLogs = new TimerTask() {
-                int i=1;
-                @Override
-                public void run() {
-                    parkingServer.save(filename + i + ".txt");
-                    i++;
-                }
-            };
-            timer.schedule(printLogs, 0, logs_delay * 1000);
-            System.out.println("Press \"s\" to stop server.");
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(System.in));
-            while(!reader.readLine().toLowerCase().equals("s"));
-            System.out.println("Exiting.");
-            parkingServer.stopNow();
-            printLogs.cancel();
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    timer.cancel();
-                    try {
-                        parkingServer.stopNow();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    System.out.println("entered:" + parkingServer.getNEntered() + " left:" + parkingServer.getNLeft());
-                    if (parkingServer.getRejected() > 0)
-                        System.out.println(parkingServer.getRejected() + " were rejected because the parking closed before they could enter or server was closed too soon");
-                }
-            },timeOut * 1000);
-
-        } else{
-            System.out.println("Usage: capacity [port] [timeout] [logs-delay]\nExiting.");
-        }
     }
 }
