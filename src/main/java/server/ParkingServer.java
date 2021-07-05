@@ -70,62 +70,6 @@ public class ParkingServer implements Runnable{
         return parking.getRejected();
     }
 
-    public static void main(String[] args) throws IOException {
-        int capacity, port = 8080, timeOut = 5, logs_delay=1;
-        ParkingServer parkingServer;
-        if (args.length > 0 && args.length < 5){
-            capacity = Integer.valueOf(args[0]);
-            switch (args.length){
-                case 4: logs_delay = Integer.valueOf(args[3]);
-                case 3: timeOut = Integer.valueOf(args[2]);
-                case 2: port = Integer.valueOf(args[1]);
-            }
-            System.out.println("capacity: " + capacity + "\nUsing port " + port);
-            System.out.println("Using timeout= " + timeOut + "s after accepting entering clients stops");
-            System.out.println("Saving logs every " + logs_delay + "s");
-            parkingServer= new ParkingServer(port, capacity);
-            Timer timer = new Timer();
-            Thread parkingThread = new Thread(parkingServer);
-            parkingThread.start();
-            String filename = "log";
-            TimerTask printLogs = new TimerTask() {
-                int i=1;
-                @Override
-                public void run() {
-                    parkingServer.save(filename + i + ".txt");
-                    i++;
-                }
-            };
-            timer.schedule(printLogs, 0, logs_delay * 1000);
-            System.out.println("Press \"s\" to stop server.");
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(System.in));
-            while(!reader.readLine().toLowerCase().equals("s"));
-            System.out.println("Exiting.");
-            parkingServer.stop();
-            printLogs.cancel();
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    timer.cancel();
-                    try {
-                        parkingServer.stopNow();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    System.out.println("entered:" + parkingServer.getNEntered() + " left:" + parkingServer.getNLeft());
-                    if (parkingServer.getRejected() > 0)
-                        System.out.println(parkingServer.getRejected() + " were rejected because the parking closed before they could enter or server was closed too soon");
-                }
-            },timeOut * 1000);
-
-        } else{
-            System.out.println("Usage: capacity [port]\nExiting.");
-        }
-        return;
-
-    }
-
     public int getPort() {
         return port;
     }

@@ -14,9 +14,27 @@ public class ServerGUI extends JFrame {
     final static boolean RIGHT_TO_LEFT = false;
     private ParkingServer parkingServer;
     private Thread parkingThread = null;
+    private Timer timer = new Timer();
+    private final String filename = "log";
+    private final int logs_delay;
+    private final int timeOut;
+    private final TimerTask printLogs = new TimerTask() {
+        int i=1;
+        @Override
+        public void run() {
+            parkingServer.save(filename + i + ".txt");
+            i++;
+        }
+    };
 
     public ServerGUI(ParkingServer parkingServer){
+        this(parkingServer, 1, 5);
+    }
+
+    public ServerGUI(ParkingServer parkingServer, int logs_delay, int timeOut) {
         this.parkingServer = parkingServer;
+        this.logs_delay = logs_delay;
+        this.timeOut = timeOut;
     }
 
     public void addComponentsToPane(Container pane) {
@@ -58,17 +76,47 @@ public class ServerGUI extends JFrame {
         System.setOut(printStream);
 
         openButton.addActionListener(e -> {
-            parkingThread = new Thread(parkingServer);
-            parkingThread.start();
-            openButton.setEnabled(false);
-            closeButton.setEnabled(true);
+            new SwingWorker() {
+                @Override
+                protected Void doInBackground() throws Exception {
+                    timer.schedule(printLogs, 0, logs_delay * 1000);
+                    parkingThread = new Thread(parkingServer);
+                    parkingThread.start();
+                    return null;
+                }
+
+                @Override
+                protected void done() {
+                    openButton.setEnabled(false);
+                    closeButton.setEnabled(true);
+                }
+            }.execute();
         });
 
         closeButton.addActionListener(e -> {
+            new SwingWorker() {
+                @Override
+                protected Void doInBackground() throws Exception {
+                    timer.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            timer.cancel();
+                            try {
+                                parkingServer.stopNow();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            System.out.println("entered:" + parkingServer.getNEntered() + " left:" + parkingServer.getNLeft());
+                            if (parkingServer.getRejected() > 0)
+                                System.out.println(parkingServer.getRejected() + " were rejected because the parking closed before they could enter or server was closed too soon");
+                        }
+                    },timeOut * 1000);
+                    return null;
+                }
+            }.execute();
             parkingServer.stop();
             closeButton.setEnabled(false);
         });
-
     }
 
     private void createAndShowGUI() {
@@ -82,5 +130,33 @@ public class ServerGUI extends JFrame {
         //Display the window.
         frame.pack();
         frame.setVisible(true);
+    }
+
+    public static void main(String[] args) throws IOException {
+        int capacity, port = 8080, timeOut = 5, logs_delay=1;
+        ParkingServer parkingServer;
+        if (args.length > 0 && args.length < 5){
+            capacity = Integer.valueOf(args[0]);
+            switch (args.length){
+                case 4: logs_delay = Integer.valueOf(args[3]);
+                case 3: timeOut = Integer.valueOf(args[2]);
+                case 2: port = Integer.valueOf(args[1]);
+            }
+            parkingServer= new ParkingServer(port, capacity);
+            Runnable init = new ServerGUI(parkingServer, logs_delay, timeOut)::createAndShowGUI;
+            SwingUtilities.invokeLater(init);
+            System.out.println("capacity: " + capacity + "\nUsing port " + port);
+            System.out.println("Using timeout= " + timeOut + "s after accepting entering clients stops");
+            System.out.println("Saving logs every " + logs_delay + "s");
+            System.out.println("Press \"s\" to stop server.");
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(System.in));
+            while(!reader.readLine().toLowerCase().equals("s"));
+            System.out.println("Exiting.");
+            parkingServer.stopNow();
+
+        } else{
+            System.out.println("Usage: capacity [port] [timeout] [logs-delay]\nExiting.");
+        }
     }
 }
