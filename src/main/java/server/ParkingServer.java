@@ -1,5 +1,10 @@
 package server;
 
+import com.google.gson.Gson;
+import common.ContentMessage;
+import common.StatusResponse;
+import spark.Spark;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -7,6 +12,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import static spark.Spark.post;
 
 public class ParkingServer implements Runnable{
     private Parking parking;
@@ -45,8 +52,22 @@ public class ParkingServer implements Runnable{
         parking.save(filename);
     }
 
+    private void setRoutes(){
+        post("/users", (request, response) -> {
+            boolean success;
+            response.type("application/json");
+            String body = request.body();
+            ContentMessage cm = new Gson().fromJson(body, ContentMessage.class);
+            success = SensorWorker.submit(cm.getTipoRichiesta(), cm.getPlate(), parking, cm.getBrand());
+            if (success)
+                return new Gson().toJson(StatusResponse.SUCCESS);
+            return new Gson().toJson(StatusResponse.ERROR);
+        });
+    }
+
     @Override
     public void run() {
+        setRoutes();
         while(!isStopped){
             Socket clientSocket;
             try {
@@ -60,6 +81,7 @@ public class ParkingServer implements Runnable{
             }
              new Thread(new SensorWorker(clientSocket, parking)).start();
         }
+        Spark.stop();
     }
 
     public int getNEntered() { return parking.getNEntered(); }

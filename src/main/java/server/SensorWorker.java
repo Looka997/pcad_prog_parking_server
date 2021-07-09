@@ -21,33 +21,35 @@ public class SensorWorker implements Runnable {
     public static void stopEntering(){
         entering.shutdownNow();
     }
+
+    public static boolean submit(TipoRichiesta request, String targa, Parking parking, String brand) throws ExecutionException, InterruptedException {
+        if (request.compareTo(TipoRichiesta.ENTRATA) == 0){
+            return entering.submit(new PartialClient(targa, parking, brand) {
+                @Override
+                public Boolean call() throws OperationsException {
+                    return park();
+                }
+            }).get();
+        };
+        return exiting.submit(new PartialClient(targa, parking, brand){
+                @Override
+                public Boolean call() throws OperationsException {
+                    return unpark();
+                }
+            }).get();
+
+    }
+
     public static void stopExiting(){ exiting.shutdownNow(); }
     @Override
     public void run() {
         try {
             InputStream input = clientSocket.getInputStream();
-            boolean success;
             InputStreamReader inputReader= new InputStreamReader(input);
             PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(),true);
             BufferedReader reader = new BufferedReader(inputReader);
             ContentMessage cm = ContentMessage.fromString(reader.readLine());
-            if (cm.getTipoRichiesta().compareTo(TipoRichiesta.ENTRATA) == 0){
-                success = entering.submit(new PartialClient(cm.getTarga(), parking, cm.getMarca()) {
-                    @Override
-                    public Boolean call() throws OperationsException {
-                        return park();
-                    }
-                }).get();
-            }
-            else{
-                success = exiting.submit(new PartialClient(cm.getTarga(), parking, cm.getMarca()) {
-                    @Override
-                    public Boolean call() throws OperationsException {
-                        return unpark();
-                    }
-                }).get();
-            }
-            if (success)
+            if (submit(cm.getTipoRichiesta(),cm.getPlate(), parking, cm.getBrand()))
                 writer.println("OK\n");
             else
                 writer.println("NOT_OK\n");

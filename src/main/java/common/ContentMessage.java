@@ -6,23 +6,29 @@ import java.util.Date;
 
 public class ContentMessage {
 
-    private TipoRichiesta tipoRichiesta;
-    private String targa;
-    private String marca;
+    private TipoRichiesta request;
+    private String plate;
+    private String brand;
     private Date date;
-    private static final String dateFormat = "EEE MMM d HH:mm:ss zzz yyyy";
+    private static final String dateFormat = "EEE MMM dd HH:mm:ss zzz yyyy";
     private static SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
 
 
-    public ContentMessage(TipoRichiesta tipoRichiesta, String targa, String marca, Date date){
-        this.tipoRichiesta = tipoRichiesta;
-        this.targa = targa;
+    public ContentMessage(TipoRichiesta request, String plate, String brand, Date date){
+        this.request = request;
+        this.plate = plate;
         this.date = date;
-        this.marca = marca;
+        this.brand = brand;
+    }
+    public ContentMessage(TipoRichiesta request, String plate, String brand){
+        this.request = request;
+        this.plate = plate;
+        this.brand = brand;
+        this.date = new Date();
     }
     @Override
     public String toString() {
-        return tipoRichiesta.name() + "," + targa.toString() + "," + marca + "," + date.toString() + "\n";
+        return request.name() + "," + plate.toString() + "," + brand + "," + date.toString() + "\n";
     }
 
     public synchronized static ContentMessage fromString(String str){
@@ -39,8 +45,8 @@ public class ContentMessage {
         return new ContentMessage(TipoRichiesta.valueOf(split[0]), split[1], split[2], date);
     }
 
-    public String getTarga() {
-        return targa;
+    public String getPlate() {
+        return plate;
     }
 
     public Date getDate() {
@@ -48,10 +54,10 @@ public class ContentMessage {
     }
 
     public TipoRichiesta getTipoRichiesta() {
-        return tipoRichiesta;
+        return request;
     }
 
-    public String getMarca() {
-        return marca;
+    public String getBrand() {
+        return brand;
     }
 }
