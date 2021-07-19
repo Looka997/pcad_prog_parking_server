@@ -45,5 +45,10 @@ public abstract class Client {
         System.out.println("client " + getTarga() + " has left the parking");
     }
 
-
+    @Override
+    public int hashCode() {
+        int result = targa.hashCode();
+        result = 31 * result + marca.hashCode();
+        return result;
+    }
 }

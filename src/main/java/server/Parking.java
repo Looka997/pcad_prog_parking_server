@@ -3,7 +3,6 @@ import common.Client;
 import javax.management.OperationsException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
 
 public class Parking {
@@ -18,7 +17,7 @@ public class Parking {
         if (capacity < 0)
             throw new IllegalArgumentException("capacity should not be negative");
         this.capacity = capacity;
-        parked = new UniqueBlockingQueue<>(capacity);
+        parked = new UniqueBlockingQueue<Client>(capacity);
 
     }
 
@@ -30,7 +29,10 @@ public class Parking {
             }
         }
         try {
-            parked.put(client);
+            if (parked.put(client)) {
+                nentered++;
+                return true;
+            }
         } catch (InterruptedException e) {
             synchronized (closed){
                 if (closed) {
@@ -39,8 +41,7 @@ public class Parking {
                 }
             }
         }
-        nentered++;
-        return true;
+        return false;
     }
 
     public boolean exit(Client client) throws OperationsException {
