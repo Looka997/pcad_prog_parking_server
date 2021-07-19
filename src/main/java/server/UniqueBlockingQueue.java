@@ -8,18 +8,18 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class BlockingUniqueQueue<K> {
+public class UniqueBlockingQueue<K> {
     private final Set set;
     final Lock lock = new ReentrantLock();
     final Condition notFull = lock.newCondition();
     final Condition notEmpty = lock.newCondition();
     int count;
 
-    public BlockingUniqueQueue(){
+    public UniqueBlockingQueue(){
         this(16);
     }
 
-    public BlockingUniqueQueue(int capacity){
+    public UniqueBlockingQueue(int capacity){
         set = Collections.synchronizedSet(new LinkedHashSet<K>(capacity));
     }
 
