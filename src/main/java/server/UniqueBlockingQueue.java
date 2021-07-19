@@ -55,4 +55,28 @@ public class UniqueBlockingQueue<K> {
         }
     }
 
+    public boolean remove(K key){
+        lock.lock();
+        try {
+            boolean removed = set.remove(key);
+            if (removed){
+                --count;
+                notFull.signal();
+            }
+            return removed;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public int size(){
+        lock.lock();
+        try{
+            return count;
+        }finally {
+            lock.unlock();
+        }
+
+    }
+
 }

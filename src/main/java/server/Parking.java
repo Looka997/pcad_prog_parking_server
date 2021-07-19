@@ -8,7 +8,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class Parking {
     private final int capacity;
-    private ArrayBlockingQueue<Client> parked;
+    private UniqueBlockingQueue<Client> parked;
     private Boolean closed = false;
     private int rejected = 0;
     private volatile int nleft = 0;
@@ -18,7 +18,7 @@ public class Parking {
         if (capacity < 0)
             throw new IllegalArgumentException("capacity should not be negative");
         this.capacity = capacity;
-        parked = new ArrayBlockingQueue<>(capacity, true);
+        parked = new UniqueBlockingQueue<>(capacity);
 
     }
 
