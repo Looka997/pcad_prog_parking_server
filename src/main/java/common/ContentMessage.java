@@ -1,30 +1,30 @@
 package common;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.util.Objects;
 
 public class ContentMessage {
 
     private TipoRichiesta request;
     private String plate;
     private String brand;
-    private Date date;
-    private static final String dateFormat = "EEE MMM dd HH:mm:ss zzz yyyy";
-    private static SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
+    private Instant date;
 
+    private void checkArguments(){
+        Objects.requireNonNull(date);
+        if (plate.equals(""))
+            throw new IllegalArgumentException("plate must not be empty");
+    }
 
-    public ContentMessage(TipoRichiesta request, String plate, String brand, Date date){
+    public ContentMessage(TipoRichiesta request, String plate, String brand, Instant date){
         this.request = request;
         this.plate = plate;
         this.date = date;
-        this.brand = brand;
+        this.brand = Brands.valueOf(brand).name();
+        checkArguments();
     }
     public ContentMessage(TipoRichiesta request, String plate, String brand){
-        this.request = request;
-        this.plate = plate;
-        this.brand = brand;
-        this.date = new Date();
+        this(request, plate, brand, Instant.now());
     }
     @Override
     public String toString() {
@@ -34,22 +34,15 @@ public class ContentMessage {
     public synchronized static ContentMessage fromString(String str){
         String[] split = str.split(",");
         if (split.length != 4)
-            throw new IllegalArgumentException("usage: $TipoRichiesta,$Targa,$Date");
-        String date_str = split[3];
-        Date date = null;
-        try {
-            date = dateFormatter.parse(date_str);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return new ContentMessage(TipoRichiesta.valueOf(split[0]), split[1], split[2], date);
+            throw new IllegalArgumentException("usage: $TipoRichiesta,$Targa,$Instant");
+        return new ContentMessage(TipoRichiesta.valueOf(split[0]), split[1], split[2], Instant.parse(split[3]));
     }
 
     public String getPlate() {
         return plate;
     }
 
-    public Date getDate() {
+    public Instant getDate() {
         return date;
     }
 

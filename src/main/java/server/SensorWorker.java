@@ -1,6 +1,5 @@
 package server;
 
-import common.Brands;
 import common.ContentMessage;
 import common.TipoRichiesta;
 
@@ -24,16 +23,15 @@ public class SensorWorker implements Runnable {
     }
 
     public static boolean submit(TipoRichiesta request, String targa, Parking parking, String brand) throws ExecutionException, InterruptedException {
-        String checkedBrand = Brands.valueOf(brand).name();
         if (request.compareTo(TipoRichiesta.ENTRATA) == 0){
-            return entering.submit(new PartialClient(targa, parking, checkedBrand) {
+            return entering.submit(new PartialClient(targa, parking, brand) {
                 @Override
                 public Boolean call() throws OperationsException {
                     return park();
                 }
             }).get();
         };
-        return exiting.submit(new PartialClient(targa, parking, checkedBrand){
+        return exiting.submit(new PartialClient(targa, parking, brand){
                 @Override
                 public Boolean call() throws OperationsException {
                     return unpark();

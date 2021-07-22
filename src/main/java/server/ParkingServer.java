@@ -1,17 +1,15 @@
 package server;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.InstanceCreator;
 import common.ContentMessage;
 import common.StatusResponse;
 import spark.Spark;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import static spark.Spark.post;
 
@@ -57,7 +55,9 @@ public class ParkingServer implements Runnable{
             boolean success;
             response.type("application/json");
             String body = request.body();
-            ContentMessage cm = new Gson().fromJson(body, ContentMessage.class);
+            Gson gson = new GsonBuilder().serializeNulls().create();
+            MessageInstanceCreator mic = gson.fromJson(body, MessageInstanceCreator.class);
+            ContentMessage cm = mic.createInstance(ContentMessage.class);
             success = SensorWorker.submit(cm.getTipoRichiesta(), cm.getPlate(), parking, cm.getBrand());
             if (success)
                 return new Gson().toJson(StatusResponse.SUCCESS);
