@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import static spark.Spark.post;
+import static spark.Spark.*;
 
 public class ParkingServer implements Runnable{
     private Parking parking;
@@ -66,6 +66,18 @@ public class ParkingServer implements Runnable{
                 return new Gson().toJson(StatusResponse.SUCCESS);
             return new Gson().toJson(StatusResponse.ERROR);
         });
+        String usage =
+                "<html>" +
+                    "<body>" +
+                        "Usage: " +
+                        "POST 'Content-Type: application/json' " +
+                        "'{\"request\" : \"ENTRATA\" OR \"USCITA\", " +
+                        "\"plate\": YOUR PLATE HERE, " +
+                        "\"brand\" : VALID BRAND HERE}'" +
+                    "</body>" +
+                "</html>";
+        internalServerError(usage);
+        notFound(usage);
     }
 
     @Override
