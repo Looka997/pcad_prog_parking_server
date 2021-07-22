@@ -6,16 +6,17 @@ import common.TipoRichiesta;
 
 import java.lang.reflect.Type;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 
 public class MessageInstanceCreator implements InstanceCreator<ContentMessage> {
 
     private TipoRichiesta request;
     private String plate;
     private String brand;
-    private Instant date;
+    private String date;
 
     @Override
     public ContentMessage createInstance(Type type) {
-        return date == null? new ContentMessage(request, plate, brand) : new ContentMessage(request, plate, brand, date);
+        return date == null || date.equals("")? new ContentMessage(request, plate, brand) : new ContentMessage(request, plate, brand, Instant.parse(date));
     }
 }

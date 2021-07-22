@@ -55,7 +55,10 @@ public class ParkingServer implements Runnable{
             boolean success;
             response.type("application/json");
             String body = request.body();
-            Gson gson = new GsonBuilder().serializeNulls().create();
+            Gson gson = new GsonBuilder()
+                    .serializeNulls()
+                    .setDateFormat("yyyy-MM-dd'T'HH:mm:ssX")
+                    .create();
             MessageInstanceCreator mic = gson.fromJson(body, MessageInstanceCreator.class);
             ContentMessage cm = mic.createInstance(ContentMessage.class);
             success = SensorWorker.submit(cm.getTipoRichiesta(), cm.getPlate(), parking, cm.getBrand());
