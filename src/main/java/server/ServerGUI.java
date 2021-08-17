@@ -12,7 +12,7 @@ import javax.swing.*;
 
 public class ServerGUI extends JFrame {
     final static boolean RIGHT_TO_LEFT = false;
-    private ParkingServer parkingServer;
+    private final ParkingServer parkingServer;
     private Thread parkingThread = null;
     private Timer timer = new Timer();
     private final String filename = "log";
@@ -96,7 +96,7 @@ public class ServerGUI extends JFrame {
         closeButton.addActionListener(e -> {
             new SwingWorker() {
                 @Override
-                protected Void doInBackground() throws Exception {
+                protected Void doInBackground() {
                     timer.schedule(new TimerTask() {
                         @Override
                         public void run() {
@@ -136,11 +136,11 @@ public class ServerGUI extends JFrame {
         int capacity, port = 8080, timeOut = 5, logs_delay=1;
         ParkingServer parkingServer;
         if (args.length > 0 && args.length < 5){
-            capacity = Integer.valueOf(args[0]);
+            capacity = Integer.parseInt(args[0]);
             switch (args.length){
-                case 4: logs_delay = Integer.valueOf(args[3]);
-                case 3: timeOut = Integer.valueOf(args[2]);
-                case 2: port = Integer.valueOf(args[1]);
+                case 4: logs_delay = Integer.parseInt(args[3]);
+                case 3: timeOut = Integer.parseInt(args[2]);
+                case 2: port = Integer.parseInt(args[1]);
             }
             parkingServer= new ParkingServer(port, capacity);
             Runnable init = new ServerGUI(parkingServer, logs_delay, timeOut)::createAndShowGUI;
@@ -151,7 +151,7 @@ public class ServerGUI extends JFrame {
             System.out.println("Press \"s\" to stop server.");
             BufferedReader reader = new BufferedReader(
                     new InputStreamReader(System.in));
-            while(!reader.readLine().toLowerCase().equals("s"));
+            while(!reader.readLine().equalsIgnoreCase("s"));
             System.out.println("Exiting.");
             parkingServer.stopNow();
 

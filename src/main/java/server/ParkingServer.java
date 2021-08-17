@@ -2,7 +2,6 @@ package server;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.InstanceCreator;
 import common.ContentMessage;
 import common.StatusResponse;
 import spark.Spark;
@@ -14,9 +13,8 @@ import java.net.Socket;
 import static spark.Spark.*;
 
 public class ParkingServer implements Runnable{
-    private Parking parking;
-    private final int port;
-    private ServerSocket serverSocket;
+    private final Parking parking;
+    private final ServerSocket serverSocket;
     volatile boolean isStopped = false;
 
 
@@ -26,7 +24,6 @@ public class ParkingServer implements Runnable{
 
     public ParkingServer(int port, int capacity) throws IOException {
         parking = new Parking(capacity);
-        this.port = port;
         this.serverSocket = new ServerSocket(port);
     }
 
@@ -105,9 +102,5 @@ public class ParkingServer implements Runnable{
 
     public int getRejected() {
         return parking.getRejected();
-    }
-
-    public int getPort() {
-        return port;
     }
 }
