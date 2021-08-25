@@ -2,10 +2,12 @@ package server;
 
 import common.ContentMessage;
 import common.TipoRichiesta;
+import server.model.MovimentiDao;
 
 import javax.management.OperationsException;
 import java.io.*;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.concurrent.*;
 
 public class SensorWorker implements Runnable {
@@ -13,30 +15,46 @@ public class SensorWorker implements Runnable {
     private Socket clientSocket;
     private static ExecutorService entering = Executors.newCachedThreadPool();
     private static ExecutorService exiting = Executors.newCachedThreadPool();
-    public SensorWorker(Socket clientSocket, Parking parking) {
+    private final MovimentiDao dao;
+    public SensorWorker(Socket clientSocket, Parking parking, MovimentiDao dao ) {
         this.parking = parking;
         this.clientSocket = clientSocket;
+        this.dao = dao;
     }
 
     public static void stopEntering(){
         entering.shutdownNow();
     }
 
-    public static boolean submit(TipoRichiesta request, String targa, Parking parking, String brand) throws ExecutionException, InterruptedException {
+    public static boolean submit(ContentMessage cm, Parking parking, MovimentiDao dao) throws ExecutionException, InterruptedException {
+        TipoRichiesta request = cm.getTipoRichiesta();
+        String brand = cm.getBrand();
+        String plate = cm.getPlate();
+        boolean enter = cm
+                .getTipoRichiesta().compareTo(TipoRichiesta.ENTRATA) == 0;
+        try {
+            boolean lastMov = dao.checkLastMovement(plate);
+            if (lastMov == enter ){
+                System.out.println("client " + plate + " " + (lastMov? "has already " : "is not ") + "parked");
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         if (request.compareTo(TipoRichiesta.ENTRATA) == 0){
-            return entering.submit(new PartialClient(targa, parking, brand) {
+            return (entering.submit(new PartialClient(plate, parking, brand) {
                 @Override
                 public Boolean call() throws OperationsException {
                     return park();
                 }
-            }).get();
+            }).get() && dao.insert(cm));
         };
-        return exiting.submit(new PartialClient(targa, parking, brand){
+        return (exiting.submit(new PartialClient(plate, parking, brand){
                 @Override
                 public Boolean call() throws OperationsException {
                     return unpark();
                 }
-            }).get();
+            }).get() && dao.insert(cm));
 
     }
 
@@ -49,7 +67,7 @@ public class SensorWorker implements Runnable {
             PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(),true);
             BufferedReader reader = new BufferedReader(inputReader);
             ContentMessage cm = ContentMessage.fromString(reader.readLine());
-            if (submit(cm.getTipoRichiesta(),cm.getPlate(), parking, cm.getBrand()))
+            if (submit(cm, parking, dao))
                 writer.println("OK\n");
             else
                 writer.println("NOT_OK\n");

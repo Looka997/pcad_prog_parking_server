@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import common.ContentMessage;
 import common.StatusResponse;
+import server.model.MovimentiDao;
 import spark.Spark;
 
 import java.io.IOException;
@@ -16,6 +17,7 @@ public class ParkingServer implements Runnable{
     private final Parking parking;
     private final ServerSocket serverSocket;
     volatile boolean isStopped = false;
+    private final MovimentiDao movimentiDao = new MovimentiDao();
 
 
     public ParkingServer(int capacity) throws IOException {
@@ -58,9 +60,10 @@ public class ParkingServer implements Runnable{
                     .create();
             MessageInstanceCreator mic = gson.fromJson(body, MessageInstanceCreator.class);
             ContentMessage cm = mic.createInstance(ContentMessage.class);
-            success = SensorWorker.submit(cm.getTipoRichiesta(), cm.getPlate(), parking, cm.getBrand());
-            if (success)
+            success = SensorWorker.submit(cm, parking, movimentiDao);
+            if (success){
                 return new Gson().toJson(StatusResponse.SUCCESS);
+            }
             return new Gson().toJson(StatusResponse.ERROR);
         });
         String usage =
@@ -80,6 +83,7 @@ public class ParkingServer implements Runnable{
     @Override
     public void run() {
         setRoutes();
+        movimentiDao.load();
         while(!isStopped){
             Socket clientSocket;
             try {
@@ -91,7 +95,7 @@ public class ParkingServer implements Runnable{
                 }
                 throw new RuntimeException("Error accepting client connection", e);
             }
-             new Thread(new SensorWorker(clientSocket, parking)).start();
+             new Thread(new SensorWorker(clientSocket, parking, movimentiDao)).start();
         }
         Spark.stop();
     }
