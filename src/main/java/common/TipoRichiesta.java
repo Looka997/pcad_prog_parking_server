@@ -1,5 +1,5 @@
 package common;
 
 public enum TipoRichiesta {
-    ENTRATA, USCITA
+    ENTRATA, USCITA, UNSET
 }

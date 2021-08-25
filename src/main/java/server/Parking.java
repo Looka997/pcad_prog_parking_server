@@ -44,12 +44,8 @@ public class Parking {
         return false;
     }
 
-    public boolean exit(Client client) throws OperationsException {
-        if (parked.remove(client)) {
-            nleft++;
-            return true;
-        }
-        throw new OperationsException("tried to remove a client that wasn't in the Q");
+    public void exit(Client client) {
+        parked.remove(client);
     }
 
     public synchronized int free(){

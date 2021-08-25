@@ -26,7 +26,7 @@ public class MovimentiDao extends AbstractDao<ContentMessage> {
         super(tableSQL, tableName, connection);
     }
 
-    public boolean checkLastMovement(String plate) throws SQLException {
+    public TipoRichiesta checkLastMovement(String plate) throws SQLException {
         String query = "SELECT enter from " + tableName  +
                 " WHERE plate = ?" +
                 " ORDER BY ID DESC" +
@@ -35,8 +35,8 @@ public class MovimentiDao extends AbstractDao<ContentMessage> {
         stmt.setString(1,plate);
         ResultSet rs = stmt.executeQuery();
         if (rs.next())
-            return rs.getBoolean("ENTER");
-        throw new SQLException("no result found");
+            return rs.getBoolean("ENTER")? TipoRichiesta.ENTRATA : TipoRichiesta.USCITA;
+        return TipoRichiesta.UNSET;
     }
 
     @Override

@@ -5,7 +5,7 @@ import common.Client;
 import javax.management.OperationsException;
 
 public class LocalClient extends Client {
-    private Parking parking;
+    private final Parking parking;
     private boolean parked;
     public LocalClient(String targa, Parking parking, String marca) {
         super(targa, marca);
@@ -29,11 +29,7 @@ public class LocalClient extends Client {
     public boolean unpark() throws OperationsException {
         if (parking == null)
             throw new OperationsException("this client is not parked");
-        if (parking.exit(this)) {
-            printUnparkMessage();
-            parked = false;
-            return true;
-        }
-        return false;
+        parking.exit(this);
+        return true;
     }
 }

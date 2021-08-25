@@ -66,6 +66,12 @@ public class ParkingServer implements Runnable{
             }
             return new Gson().toJson(StatusResponse.ERROR);
         });
+        get("/users/:plate", (request, response) -> {
+            response.type("application/json");
+            return "{\"state\":\"" +
+                movimentiDao.checkLastMovement(request.params(":plate")) +
+                "\"}";
+        });
         String usage =
                 "<html>" +
                     "<body>" +

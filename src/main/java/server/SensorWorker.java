@@ -30,18 +30,17 @@ public class SensorWorker implements Runnable {
         TipoRichiesta request = cm.getTipoRichiesta();
         String brand = cm.getBrand();
         String plate = cm.getPlate();
-        boolean enter = cm
-                .getTipoRichiesta().compareTo(TipoRichiesta.ENTRATA) == 0;
         try {
-            boolean lastMov = dao.checkLastMovement(plate);
-            if (lastMov == enter ){
-                System.out.println("client " + plate + " " + (lastMov? "has already " : "is not ") + "parked");
+            TipoRichiesta lastMov = dao.checkLastMovement(plate);
+            if (lastMov.equals(cm.getTipoRichiesta())){
+                System.out.println("client " + plate + " " +
+                        (lastMov == TipoRichiesta.ENTRATA? "has already " : "is not ") + "parked");
                 return false;
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        if (request.compareTo(TipoRichiesta.ENTRATA) == 0){
+        if (request == TipoRichiesta.ENTRATA){
             return (entering.submit(new PartialClient(plate, parking, brand) {
                 @Override
                 public Boolean call() throws OperationsException {
