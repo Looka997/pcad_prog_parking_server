@@ -76,10 +76,11 @@ public class ParkingServer implements Runnable{
                 "<html>" +
                     "<body>" +
                         "Usage: " +
-                        "POST 'Content-Type: application/json' " +
+                        "<p>POST 'Content-Type: application/json' " +
                         "'{\"request\" : \"ENTRATA\" OR \"USCITA\", " +
                         "\"plate\": YOUR PLATE HERE, " +
-                        "\"brand\" : VALID BRAND HERE}'" +
+                        "\"brand\" : VALID BRAND HERE}'</p>" +
+                        "<p>GET /users/:plate </p>" +
                     "</body>" +
                 "</html>";
         internalServerError(usage);
