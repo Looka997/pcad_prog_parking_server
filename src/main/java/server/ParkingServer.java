@@ -45,17 +45,6 @@ public class ParkingServer implements Runnable{
         parking.close(print);
     }
 
-    public void stopNow() throws IOException {
-        stop(false);
-        isStopped = true;
-        serverSocket.close();
-        SensorWorker.stopExiting();
-    }
-
-    public void save(String filename){
-        parking.save(filename);
-    }
-
     private void setRoutes(){
         post("/users", (request, response) -> {
             boolean success;

@@ -12,12 +12,12 @@ import java.util.concurrent.*;
 
 public class SensorWorker implements Runnable {
     private static Parking parking;
-    private Socket clientSocket;
+    private final Socket clientSocket;
     private static ExecutorService entering = Executors.newCachedThreadPool();
-    private static ExecutorService exiting = Executors.newCachedThreadPool();
+    private static final ExecutorService exiting = Executors.newCachedThreadPool();
     private final MovimentiDao dao;
     public SensorWorker(Socket clientSocket, Parking parking, MovimentiDao dao ) {
-        this.parking = parking;
+        SensorWorker.parking = parking;
         this.clientSocket = clientSocket;
         this.dao = dao;
     }
@@ -47,7 +47,7 @@ public class SensorWorker implements Runnable {
                     return park();
                 }
             }).get() && dao.insert(cm));
-        };
+        }
         return (exiting.submit(new PartialClient(plate, parking, brand){
                 @Override
                 public Boolean call() throws OperationsException {
@@ -57,12 +57,9 @@ public class SensorWorker implements Runnable {
 
     }
 
-    public static void stopExiting(){ exiting.shutdownNow(); }
-
     public static void restart(){
         synchronized (entering){
-            if (entering.isTerminated())
-                entering = Executors.newCachedThreadPool();
+            if (entering.isTerminated()) entering = Executors.newCachedThreadPool();
         }
     }
     @Override
@@ -80,11 +77,7 @@ public class SensorWorker implements Runnable {
             clientSocket.close();
         } catch (RejectedExecutionException e){
             System.out.println("server.Parking was shutdown");
-        } catch(ExecutionException e){
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch(ExecutionException | InterruptedException | IOException e){
             e.printStackTrace();
         }
     }
