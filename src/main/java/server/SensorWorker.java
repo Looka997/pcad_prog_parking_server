@@ -58,6 +58,13 @@ public class SensorWorker implements Runnable {
     }
 
     public static void stopExiting(){ exiting.shutdownNow(); }
+
+    public static void restart(){
+        synchronized (entering){
+            if (entering.isTerminated())
+                entering = Executors.newCachedThreadPool();
+        }
+    }
     @Override
     public void run() {
         try {

@@ -68,6 +68,10 @@ public class ServerGUI extends JFrame {
             new SwingWorker() {
                 @Override
                 protected Void doInBackground() throws Exception {
+                    if (parkingServer.isStopped){
+                        parkingServer.restart();
+                        return null;
+                    }
                     parkingThread = new Thread(parkingServer);
                     parkingThread.start();
                     return null;
@@ -82,28 +86,9 @@ public class ServerGUI extends JFrame {
         });
 
         closeButton.addActionListener(e -> {
-            new SwingWorker() {
-                @Override
-                protected Void doInBackground() {
-                    timer.schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            timer.cancel();
-                            try {
-                                parkingServer.stopNow();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                            System.out.println("entered:" + parkingServer.getNEntered() + " left:" + parkingServer.getNLeft());
-                            if (parkingServer.getRejected() > 0)
-                                System.out.println(parkingServer.getRejected() + " were rejected because the parking closed before they could enter or server was closed too soon");
-                        }
-                    },timeOut * 1000);
-                    return null;
-                }
-            }.execute();
             parkingServer.stop();
             closeButton.setEnabled(false);
+            openButton.setEnabled(true);
         });
     }
 
@@ -141,8 +126,7 @@ public class ServerGUI extends JFrame {
                     new InputStreamReader(System.in));
             while(!reader.readLine().equalsIgnoreCase("s"));
             System.out.println("Exiting.");
-            parkingServer.stopNow();
-
+            parkingServer.stop();
         } else{
             System.out.println("Usage: capacity [port] [timeout] [logs-delay]\nExiting.");
         }

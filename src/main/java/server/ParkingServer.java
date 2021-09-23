@@ -32,6 +32,13 @@ public class ParkingServer implements Runnable{
     public void stop(){
         parking.close(true);
         SensorWorker.stopEntering();
+        isStopped = true;
+    }
+
+    public void restart(){
+        parking.start(true);
+        SensorWorker.restart();
+        isStopped = false;
     }
 
     private void stop(boolean print){

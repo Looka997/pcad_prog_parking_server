@@ -58,6 +58,12 @@ public class Parking {
         closed = true;
     }
 
+    public void start(boolean print){
+        if (print)
+            System.out.println("Parking has started");
+        closed = false;
+    }
+
     int getNLeft(){
         return nleft;
     }
