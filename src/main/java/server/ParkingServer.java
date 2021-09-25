@@ -105,7 +105,7 @@ public class ParkingServer implements Runnable{
 
     public int getNEntered() { return parking.getNEntered(); }
 
-    public int getNLeft() { return parking.getNLeft(); }
+    public int getNLeft() { return parking.getParked(); }
 
     public int getRejected() {
         return parking.getRejected();

@@ -1,16 +1,11 @@
 package server;
 import common.Client;
-import javax.management.OperationsException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
 
 public class Parking {
     private final int capacity;
     private final UniqueBlockingQueue<Client> parked;
     private Boolean closed = false;
     private int rejected = 0;
-    private volatile int nleft = 0;
     private volatile int nentered = 0;
 
     public Parking(int capacity){
@@ -44,8 +39,8 @@ public class Parking {
         return false;
     }
 
-    public void exit(Client client) {
-        parked.remove(client);
+    public boolean exit(Client client) {
+        return parked.remove(client);
     }
 
     public synchronized int free(){
@@ -64,8 +59,8 @@ public class Parking {
         closed = false;
     }
 
-    int getNLeft(){
-        return nleft;
+    int getParked(){
+        return parked.count;
     }
     int getNEntered(){
         return nentered;
@@ -76,17 +71,5 @@ public class Parking {
 
     synchronized boolean isClosed(){
         return closed;
-    }
-
-    public void save(String filename){
-        CompletableFuture.runAsync(() -> {
-            try {
-                FileWriter fw = new FileWriter(filename);
-                fw.write(parked.toString());
-                fw.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }).thenRun(() -> System.out.println("Log saved"));
     }
 }

@@ -7,8 +7,8 @@ import javax.management.OperationsException;
 public class LocalClient extends Client {
     private final Parking parking;
     private boolean parked;
-    public LocalClient(String targa, Parking parking, String marca) {
-        super(targa, marca);
+    public LocalClient(String plate, Parking parking, String brand) {
+        super(plate, brand);
         this.parking = parking;
         this.parked = false;
     }
@@ -29,7 +29,10 @@ public class LocalClient extends Client {
     public boolean unpark() throws OperationsException {
         if (parking == null)
             throw new OperationsException("this client is not parked");
-        parking.exit(this);
-        return true;
+        if (parking.exit(this)){
+            printUnparkMessage();
+            return true;
+        }
+        return false;
     }
 }
