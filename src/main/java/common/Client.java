@@ -42,7 +42,7 @@ public abstract class Client {
     }
 
     public void printUnparkMessage(){
-        System.out.println("client " + getPlate() + " has left the parking");
+        System.out.println("client " + this + " has left the parking");
     }
 
 
