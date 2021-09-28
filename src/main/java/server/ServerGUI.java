@@ -101,12 +101,6 @@ public class ServerGUI extends JFrame {
             Runnable init = new ServerGUI(parkingServer)::createAndShowGUI;
             SwingUtilities.invokeLater(init);
             System.out.println("capacity: " + capacity + "\nUsing port " + port);
-            System.out.println("Press \"s\" to stop server.");
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(System.in));
-            while(!reader.readLine().equalsIgnoreCase("s"));
-            System.out.println("Exiting.");
-            parkingServer.stop();
         } else{
             System.out.println("Usage: capacity [port]\nExiting.");
         }
