@@ -31,6 +31,7 @@ public class LocalClient extends Client {
             throw new OperationsException("this client is not parked");
         if (parking.exit(this)){
             printUnparkMessage();
+            return true;
         }
         return false;
     }

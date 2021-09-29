@@ -48,7 +48,6 @@ public class Parking {
         }
         try {
             if (parked.put(client)) {
-
                 if(dao.insert(cm)){
                     nentered++;
                     return true;
@@ -75,10 +74,6 @@ public class Parking {
         if (!checkValidMove(cm))
             return false;
         return dao.insert(cm);
-    }
-
-    public synchronized int free(){
-        return capacity - parked.size();
     }
 
     public void close(boolean print){
