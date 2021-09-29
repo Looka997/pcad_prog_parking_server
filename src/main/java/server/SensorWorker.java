@@ -51,10 +51,15 @@ public class SensorWorker implements Runnable {
         exiting.submit(new PartialClient(plate, parking, brand){
             @Override
             public Boolean call() throws OperationsException {
-                return unpark();
+                unpark();
+                return null;
             }
         }).get();
-        return dao.insert(cm);
+        if (dao.insert(cm)){
+            System.out.println("client " + plate + " has left the parking");
+            return true;
+        }
+        return false;
     }
 
     public static void restart(){
