@@ -48,13 +48,13 @@ public class SensorWorker implements Runnable {
                 }
             }).get() && dao.insert(cm));
         }
-        return (exiting.submit(new PartialClient(plate, parking, brand){
-                @Override
-                public Boolean call() throws OperationsException {
-                    return unpark();
-                }
-            }).get() && dao.insert(cm));
-
+        exiting.submit(new PartialClient(plate, parking, brand){
+            @Override
+            public Boolean call() throws OperationsException {
+                return unpark();
+            }
+        }).get();
+        return dao.insert(cm);
     }
 
     public static void restart(){
