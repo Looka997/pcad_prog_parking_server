@@ -35,7 +35,7 @@ public abstract class Client {
     }
 
     abstract public boolean park() throws OperationsException;
-    abstract public void unpark() throws OperationsException;
+    abstract public boolean unpark() throws OperationsException;
 
     public void printParkMessage(){
         System.out.println("client " + this + " has parked");

@@ -26,11 +26,12 @@ public class LocalClient extends Client {
     }
 
     @Override
-    public void unpark() throws OperationsException {
+    public boolean unpark() throws OperationsException {
         if (parking == null)
             throw new OperationsException("this client is not parked");
         if (parking.exit(this)){
             printUnparkMessage();
         }
+        return false;
     }
 }
