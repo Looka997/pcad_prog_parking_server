@@ -21,25 +21,8 @@ public class Parking {
         parked = new UniqueBlockingQueue<>(capacity);
 
     }
-
-    private boolean checkValidMove(ContentMessage cm){
-        String plate = cm.getPlate();
-        try {
-            TipoRichiesta lastMov = dao.checkLastMovement(plate);
-            if (lastMov.equals(cm.getTipoRichiesta())){
-                System.out.println("client " + plate + " " +
-                        (lastMov == TipoRichiesta.ENTRATA? "has already " : "is not ") + "parked");
-                return false;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return true;
-    }
     public boolean enter(Client client) {
         ContentMessage cm = new ContentMessage(TipoRichiesta.ENTRATA, client.getPlate(), client.getBrand());
-        if (!checkValidMove(cm))
-            return false;
         synchronized (closed){
             if (closed) {
                 rejected++;
@@ -48,7 +31,7 @@ public class Parking {
         }
         try {
             if (parked.put(client)) {
-                if(dao.insert(cm)){
+                if(dao.insert(cm,true)){
                     nentered++;
                     return true;
                 }
@@ -64,6 +47,8 @@ public class Parking {
                     return false;
                 }
             }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
         }
         return false;
     }
@@ -71,9 +56,12 @@ public class Parking {
     public boolean exit(Client client) {
         parked.remove(client);
         ContentMessage cm = new ContentMessage(TipoRichiesta.USCITA, client.getPlate(), client.getBrand());
-        if (!checkValidMove(cm))
-            return false;
-        return dao.insert(cm);
+        try {
+            return dao.insert(cm,true);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public void close(boolean print){

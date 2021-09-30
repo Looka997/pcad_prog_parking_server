@@ -39,6 +39,15 @@ public class MovimentiDao extends AbstractDao<ContentMessage> {
         return TipoRichiesta.UNSET;
     }
 
+    public boolean insert(ContentMessage contentMessage, boolean check) throws SQLException {
+        if (check){
+            synchronized (this){
+                return !checkLastMovement(contentMessage.getPlate()).equals(contentMessage.getTipoRichiesta())?
+                        insert(contentMessage) : false;
+            }
+        }
+        return insert(contentMessage);
+    }
     @Override
     public boolean insert(ContentMessage contentMessage) {
         try {
