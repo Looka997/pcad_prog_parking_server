@@ -7,7 +7,6 @@ import server.model.MovimentiDao;
 import java.sql.SQLException;
 
 public class Parking {
-    private final int capacity;
     private final UniqueBlockingQueue<Client> parked;
     private Boolean closed = false;
     private int rejected = 0;
@@ -17,7 +16,6 @@ public class Parking {
     public Parking(int capacity){
         if (capacity < 0)
             throw new IllegalArgumentException("capacity should not be negative");
-        this.capacity = capacity;
         parked = new UniqueBlockingQueue<>(capacity);
 
     }

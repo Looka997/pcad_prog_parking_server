@@ -56,7 +56,7 @@ public class ParkingServer implements Runnable{
                     .create();
             MessageInstanceCreator mic = gson.fromJson(body, MessageInstanceCreator.class);
             ContentMessage cm = mic.createInstance(ContentMessage.class);
-            success = SensorWorker.submit(cm, parking, movimentiDao);
+            success = SensorWorker.submit(cm, parking);
             if (success){
                 return new Gson().toJson(StatusResponse.SUCCESS);
             }
@@ -98,7 +98,7 @@ public class ParkingServer implements Runnable{
                 }
                 throw new RuntimeException("Error accepting client connection", e);
             }
-             new Thread(new SensorWorker(clientSocket, parking, movimentiDao)).start();
+             new Thread(new SensorWorker(clientSocket, parking)).start();
         }
         Spark.stop();
     }

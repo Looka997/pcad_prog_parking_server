@@ -2,12 +2,10 @@ package server;
 
 import common.ContentMessage;
 import common.TipoRichiesta;
-import server.model.MovimentiDao;
 
 import javax.management.OperationsException;
 import java.io.*;
 import java.net.Socket;
-import java.sql.SQLException;
 import java.util.concurrent.*;
 
 public class SensorWorker implements Runnable {
@@ -15,18 +13,16 @@ public class SensorWorker implements Runnable {
     private final Socket clientSocket;
     private static ExecutorService entering = Executors.newCachedThreadPool();
     private static final ExecutorService exiting = Executors.newCachedThreadPool();
-    private final MovimentiDao dao;
-    public SensorWorker(Socket clientSocket, Parking parking, MovimentiDao dao ) {
+    public SensorWorker(Socket clientSocket, Parking parking) {
         SensorWorker.parking = parking;
         this.clientSocket = clientSocket;
-        this.dao = dao;
     }
 
     public static void stopEntering(){
         entering.shutdownNow();
     }
 
-    public static boolean submit(ContentMessage cm, Parking parking, MovimentiDao dao) throws ExecutionException, InterruptedException {
+    public static boolean submit(ContentMessage cm, Parking parking) throws ExecutionException, InterruptedException {
         TipoRichiesta request = cm.getTipoRichiesta();
         String brand = cm.getBrand();
         String plate = cm.getPlate();
@@ -59,7 +55,7 @@ public class SensorWorker implements Runnable {
             PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(),true);
             BufferedReader reader = new BufferedReader(inputReader);
             ContentMessage cm = ContentMessage.fromString(reader.readLine());
-            if (submit(cm, parking, dao))
+            if (submit(cm, parking))
                 writer.println("OK\n");
             else
                 writer.println("NOT_OK\n");

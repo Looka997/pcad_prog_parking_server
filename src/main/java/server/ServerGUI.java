@@ -1,12 +1,10 @@
 package server;
 
 
-import java.awt.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
 import javax.swing.*;
+import java.awt.*;
+import java.io.IOException;
+import java.io.PrintStream;
 
 public class ServerGUI extends JFrame {
     private final ParkingServer parkingServer;
