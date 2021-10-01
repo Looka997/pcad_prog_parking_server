@@ -2,6 +2,8 @@ package server;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import common.ContentMessage;
 import common.StatusResponse;
 import server.model.MovimentiDao;
@@ -57,10 +59,10 @@ public class ParkingServer implements Runnable{
             MessageInstanceCreator mic = gson.fromJson(body, MessageInstanceCreator.class);
             ContentMessage cm = mic.createInstance(ContentMessage.class);
             success = SensorWorker.submit(cm, parking);
-            if (success){
-                return new Gson().toJson(StatusResponse.SUCCESS);
-            }
-            return new Gson().toJson(StatusResponse.ERROR);
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("result",
+                    String.valueOf(success? StatusResponse.SUCCESS : StatusResponse.ERROR));
+            return jsonObject;
         });
         get("/users/:plate", (request, response) -> {
             response.type("application/json");
