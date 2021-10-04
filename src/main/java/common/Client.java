@@ -24,6 +24,11 @@ public abstract class Client {
         return client.getPlate().equals(plate) && client.getBrand().equals(brand);
     }
 
+    @Override
+    public int hashCode() {
+        return plate.hashCode();
+    }
+
     public String getPlate() {
         return plate;
     }
