@@ -13,7 +13,7 @@ public class UniqueBlockingQueue<K> {
     final Lock lock = new ReentrantLock();
     final Condition notFull = lock.newCondition();
     final Condition notEmpty = lock.newCondition();
-    int count = 0;
+    int count;
     final int capacity;
 
     public UniqueBlockingQueue(){
@@ -21,8 +21,12 @@ public class UniqueBlockingQueue<K> {
     }
 
     public UniqueBlockingQueue(int capacity){
-        set = Collections.synchronizedSet(new LinkedHashSet<K>(capacity));
+        this(capacity, 0);
+    }
+    public UniqueBlockingQueue(int capacity, int count){
+        set = Collections.synchronizedSet(new LinkedHashSet<K>());
         this.capacity = capacity;
+        this.count = count;
     }
 
     public boolean put(K key) throws InterruptedException {
@@ -30,7 +34,7 @@ public class UniqueBlockingQueue<K> {
         try{
             if (set.contains(key))
                 return false;
-            while (count == capacity)
+            while (count >= capacity)
                 notFull.await();
             set.add(key);
             count++;
@@ -52,6 +56,17 @@ public class UniqueBlockingQueue<K> {
             --count;
             notFull.signal();
             return next;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public int countDown(){
+        lock.lock();
+        try{
+            --count;
+            notFull.signal();
+            return count;
         } finally {
             lock.unlock();
         }

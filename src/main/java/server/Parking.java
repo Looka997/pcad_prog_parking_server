@@ -16,8 +16,14 @@ public class Parking {
     public Parking(int capacity){
         if (capacity < 0)
             throw new IllegalArgumentException("capacity should not be negative");
-        parked = new UniqueBlockingQueue<>(capacity);
-
+        int entered = 0, exit = 0;
+        try {
+            entered = dao.getCount(true);
+            exit = dao.getCount(false);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        parked = new UniqueBlockingQueue<>(capacity, entered-exit);
     }
     public boolean enter(Client client) {
         ContentMessage cm = new ContentMessage(TipoRichiesta.ENTRATA, client.getPlate(), client.getBrand());
@@ -32,10 +38,6 @@ public class Parking {
                 if(dao.insert(cm,true)){
                     nentered++;
                     return true;
-                }
-                else{
-                    parked.remove(client);
-                    return false;
                 }
             }
         } catch (InterruptedException e) {
@@ -52,10 +54,13 @@ public class Parking {
     }
 
     public boolean exit(Client client) {
-        parked.remove(client);
+        boolean removed = parked.remove(client);
         ContentMessage cm = new ContentMessage(TipoRichiesta.USCITA, client.getPlate(), client.getBrand());
         try {
-            return dao.insert(cm,true);
+            if (dao.insert(cm,true)){
+                if (!removed) parked.countDown();
+                return true;
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

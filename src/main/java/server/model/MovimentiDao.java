@@ -85,4 +85,20 @@ public class MovimentiDao extends AbstractDao<ContentMessage> {
     public boolean delete(ContentMessage contentMessage) {
         throw new UnsupportedOperationException();
     }
+
+    public int getCount(boolean entered) throws SQLException {
+        try {
+            PreparedStatement stmt = connection.prepareStatement(
+                    "SELECT COUNT(*) AS count FROM " + tableName + " WHERE enter = ? ");
+            stmt.setBoolean(1, entered);
+            if (stmt.execute()){
+                ResultSet rs = stmt.getResultSet();
+                if (rs.next())
+                    return rs.getInt("count");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        throw new SQLException("could not get entered count");
+    }
 }
